@@ -60,10 +60,6 @@ class RegistroClasse{
           console.log("Studente trovato.")
         }
     }
-    
-    listaStudenti(){
-
-    }
 }
 
 const readline = require('readline');
