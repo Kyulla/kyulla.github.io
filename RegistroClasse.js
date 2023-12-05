@@ -7,7 +7,6 @@ class Studente{
 
     setVoto(voto ,data){
         this.voti.push({voto, data});
-        console.log("Voto aggiunto con successo");
     }
 }
 
@@ -16,10 +15,20 @@ class RegistroClasse{
         this.studenti = [];
     }
 
+    static createFromLocalStorage(data) {
+        const registro = new RegistroClasse();
+        Object.assign(registro, data);
+        registro.studenti = registro.studenti.map(studenteData => {
+            const studente = new Studente();
+            Object.assign(studente, studenteData);
+            return studente;
+        });
+        return registro;
+    }
+
     setStudente(nome, cognome){
         const nuovoStudente = new Studente(nome, cognome);
         this.studenti.push(nuovoStudente);
-        console.log("Studente aggiunto con successo");
     }
 
     listaStudente(){
@@ -38,7 +47,6 @@ class RegistroClasse{
         if (modStudente){
             modStudente.nome = nuovoNome;
             modStudente.cognome = nuovoCognome;
-            console.log("Studente modificato con successo");
         }
     }
 
@@ -46,7 +54,6 @@ class RegistroClasse{
         const delStudente = this.studenti.findIndex(studente => studente.nome === nome && studente.cognome === cognome);
         if (delStudente != -1){
             this.studenti.splice(delStudente, 1);
-            console.log("Utente rimosso con successo");
         }
     }
 
@@ -57,82 +64,188 @@ class RegistroClasse{
 
         if (studente) {
           studente.setVoto(voto, data);
-          console.log("Studente trovato.")
         }
     }
 }
 
-const readline = require('readline');
-const registro = new RegistroClasse();
+var registro = new RegistroClasse();
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+function saveToLocalStorage(){
+    localStorage.setItem('registro', JSON.stringify(registro));
+}
 
-function gestioneSwitch(){
-    rl.question("\n1)Aggiungi studente\n2)Aggiungi voto\n3)Modifica studente\n4)Elimina utente\n5)Lista degli studenti\n0)Esci\nChe operazione vuoi svolgere?: ", (r) =>{
+function loadFromLocalStorage() {
+    const storedRegistro = localStorage.getItem('registro');
+    registro = RegistroClasse.createFromLocalStorage(JSON.parse(storedRegistro));
+}
 
-    switch(r){
-        case "1":
-            rl.question("\nDigita il nome dello studente: ", (nome) =>{
-                rl.question("\nDigita il cognome dello studente: ", (cognome)=>{
-                    registro.setStudente(nome, cognome);
-                    gestioneSwitch()
-                });
+loadFromLocalStorage();
+document.getElementById("option-selector").addEventListener("change", function(){
+    const opzione = document.getElementById("option-selector").value;
+
+    var form = document.createElement("form");
+
+    var button = document.createElement("button");
+    button.type = "submit";
+    button.textContent = "Invio";
+
+    switch (opzione){
+
+        case "setStudente":
+            var nome = document.createElement("input");
+            nome.type = "text";
+            nome.id = "nome";
+            nome.placeholder = "Nome";
+            nome.required = true;
+            form.appendChild(nome);
+
+            var cognome = document.createElement("input");
+            cognome.type = "text";
+            cognome.id = "cognome";
+            cognome.placeholder = "Cognome"
+            cognome.required = true;
+            form.appendChild(cognome);
+
+            form.appendChild(button);
+
+            document.getElementById('result').appendChild(form);
+
+            button.addEventListener("click", function(){
+                registro.setStudente(
+                    document.getElementById("nome").value,
+                    document.getElementById("cognome").value);
+                    saveToLocalStorage();
             });
             break;
+
+        case "aggiungiVotoAStudente":
+            var nome = document.createElement("input");
+            nome.type = "text";
+            nome.id = "nome";
+            nome.placeholder = "Nome";
+            nome.required = true;
+            form.appendChild(nome);
+
+            var cognome = document.createElement("input");
+            cognome.type = "text";
+            cognome.id = "cognome";
+            cognome.placeholder = "Cognome"
+            cognome.required = true;
+            form.appendChild(cognome);
+
+            var voto = document.createElement("input");
+            voto.type = "number";
+            voto.id = "voto";
+            voto.placeholder = "Voto";
+            voto.required = true;
+            form.appendChild(voto);
+
+            var data = document.createElement("input");
+            data.type = "date";
+            data.id = "data";
+            data.required = true;
+            form.appendChild(data);
+
+            form.appendChild(button);
+
+            document.getElementById('result').appendChild(form);
+
+            button.addEventListener("click", function(){
+                registro.aggiungiVotoAStudente(
+                    document.getElementById("nome").value,
+                    document.getElementById("cognome").value,
+                    document.getElementById("voto").value,
+                    document.getElementById("data").value);
+                saveToLocalStorage();
+            });
+                break;
+
+        case "modifyStudente":
+            var nome = document.createElement("input");
+            nome.type = "text";
+            nome.id = "nome";
+            nome.placeholder = "Nome";
+            nome.required = true;
+            form.appendChild(nome);
+
+            var cognome = document.createElement("input");
+            cognome.type = "text";
+            cognome.id = "cognome";
+            cognome.placeholder = "Cognome"
+            cognome.required = true;
+            form.appendChild(cognome);
+
+            var nomeNuovo = document.createElement("input");
+            nomeNuovo.type = "text";
+            nomeNuovo.id = "nomeNuovo";
+            nomeNuovo.placeholder = "Nome nuovo";
+            nomeNuovo.required = true;
+            form.appendChild(nomeNuovo);
+
+            var cognomeNuovo = document.createElement("input");
+            cognomeNuovo.type = "text";
+            cognomeNuovo.id = "cognomeNuovo";
+            cognomeNuovo.placeholder = "Cognome nuovo"
+            cognomeNuovo.required = true;
+            form.appendChild(cognomeNuovo);
+            
+            form.appendChild(button);
+
+            document.getElementById('result').appendChild(form);
+
+            button.addEventListener("click", function(){
+                registro.modifyStudente(
+                    document.getElementById("nome").value,
+                    document.getElementById("cognome").value,
+                    document.getElementById("nomeNuovo").value,
+                    document.getElementById("cognomeNuovo").value);
+                saveToLocalStorage();
+            });
+            break;
+
+        case "deleteStudente":
+            var nome = document.createElement("input");
+            nome.type = "text";
+            nome.id = "nome";
+            nome.placeholder = "Nome";
+            nome.required = true;
+            form.appendChild(nome);
+
+            var cognome = document.createElement("input");
+            cognome.type = "text";
+            cognome.id = "cognome";
+            cognome.placeholder = "Cognome"
+            cognome.required = true;
+            form.appendChild(cognome);
+
+            form.appendChild(button)
+
+            document.getElementById('result').appendChild(form);
+
+            button.addEventListener("click", function(){
+                registro.deleteStudente(
+                    document.getElementById("nome").value,
+                    document.getElementById("cognome").value);
+                saveToLocalStorage()
+            });
+            break;
+
+        case "getStudente":
+            var lista = document.createElement("p");
+            var studentiString = registro.getStudente();
+            
+            if (studentiString && studentiString.trim() !== "") {
+                lista.textContent = studentiString;
+            } else {
+                lista.textContent = "Nessun studente trovato.";
+            }
         
-        case "2":
-            rl.question("\nDigita il nome dello studente: ", (nome) =>{
-                rl.question("\nDigita il cognome dello studente: ", (cognome)=>{
-                    rl.question("\nDigita il voto da aggiungere: ", (voto) =>{
-                        rl.question("\nDigita la data del voto: ", (data)=>{
-                            registro.aggiungiVotoAStudente(nome, cognome, voto, data);
-                            gestioneSwitch()
-                        })
-                    })
-                });
-            });
-            break;
-
-        case "3":
-            rl.question("\nDigita il nome dello studente: ", (nome) =>{
-                rl.question("\nDigita il cognome dello studente: ", (cognome)=>{
-                    rl.question("\nDigita il nuovo nome dello studente: ", (nuovoNome) =>{
-                        rl.question("\nDigita il nuovo cognome dello studente: ", (nuovoCognome)=>{
-                            registro.modifyStudente(nome, cognome, nuovoNome, nuovoCognome);
-                            gestioneSwitch()
-                        });
-                    });
-                });
-            });
-            break;
-
-        case "4":
-            rl.question("\nDigita il nome dello studente: ", (nome) =>{
-                rl.question("\nDigita il cognome dello studente: ", (cognome)=>{
-                    registro.deleteStudente(nome, cognome);
-                    gestioneSwitch()
-                });
-            });
-            break;
-
-        case "5":
-            console.log("Registro studenti: " + registro.getStudente());
-            gestioneSwitch();
-            break;
-
-        case "0":
-            rl.close();
+            document.getElementById('result').appendChild(lista);
             break;
 
         default:
             console.log("Errore, caso non gestito.");
-            gestioneSwitch();
             break;
     }
-    })
-}
+});
 
-gestioneSwitch();
