@@ -1,0 +1,21 @@
+body {
+    background-color: #1b1c1c;
+    color: whitesmoke;
+}
+
+#tableStudenti {
+    border: 1px solid whitesmoke;
+    border-collapse: collapse;
+}
+
+#tableStudenti th, #tableStudenti td {
+    border: 1px solid whitesmoke;
+}
+
+#tableStudenti .voto-verde {
+    color: lime;
+}
+
+#tableStudenti .voto-rosso {
+    color: crimson;
+}

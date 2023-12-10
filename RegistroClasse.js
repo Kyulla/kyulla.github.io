@@ -1,3 +1,4 @@
+//Inizio classe Studente
 class Studente{
     constructor(nome, cognome){
         this.nome = nome;
@@ -9,7 +10,9 @@ class Studente{
         this.voti.push({voto, data});
     }
 }
+//Fine classe Studente
 
+//Inizio classe RegistroClasse
 class RegistroClasse{
     constructor(){
         this.studenti = [];
@@ -31,15 +34,10 @@ class RegistroClasse{
         this.studenti.push(nuovoStudente);
     }
 
-    listaStudente(){
+    getStudente(){
         return this.studenti.map(studente => {
             return { nome: studente.nome, cognome: studente.cognome, voti: studente.voti, data: studente.data };
         });
-    }    
-
-    getStudente(){
-        const stringaStudenti = this.listaStudente();
-        return JSON.stringify(stringaStudenti, null, 2);
     }
 
     modifyStudente(nome, cognome, nuovoNome, nuovoCognome){
@@ -67,21 +65,31 @@ class RegistroClasse{
         }
     }
 }
+//Fine classe RegistroClasse
 
+//Istanziamento della della classe RegistroClasse
 var registro = new RegistroClasse();
 
+//Funzione atta al salvataggio dei dati nel local storage
 function saveToLocalStorage(){
     localStorage.setItem('registro', JSON.stringify(registro));
 }
 
+//Funzione atta al caricamento dei dati nel local storage
 function loadFromLocalStorage() {
     const storedRegistro = localStorage.getItem('registro');
     registro = RegistroClasse.createFromLocalStorage(JSON.parse(storedRegistro));
 }
 
+//Richiamo della funzione per caricare i dati presenti nel local storage
 loadFromLocalStorage();
+
+//Inizio funzioni JavaScript per interagire con l'utente
+//Event listener del form per controllare quale opzione si è scelta nel form
 document.getElementById("option-selector").addEventListener("change", function(){
     const opzione = document.getElementById("option-selector").value;
+
+    document.getElementById('result').innerHTML = '';
 
     var form = document.createElement("form");
 
@@ -89,8 +97,10 @@ document.getElementById("option-selector").addEventListener("change", function()
     button.type = "submit";
     button.textContent = "Invio";
 
+    //Switch case per gestire le varie opzioni
     switch (opzione){
 
+        //Creazione di un form per aggiungere uno studente
         case "setStudente":
             var nome = document.createElement("input");
             nome.type = "text";
@@ -118,6 +128,7 @@ document.getElementById("option-selector").addEventListener("change", function()
             });
             break;
 
+        //Creazione di un form per aggiungere un voto ad uno studente
         case "aggiungiVotoAStudente":
             var nome = document.createElement("input");
             nome.type = "text";
@@ -160,6 +171,7 @@ document.getElementById("option-selector").addEventListener("change", function()
             });
                 break;
 
+        //Creazione di un form per modificare uno studente
         case "modifyStudente":
             var nome = document.createElement("input");
             nome.type = "text";
@@ -203,6 +215,7 @@ document.getElementById("option-selector").addEventListener("change", function()
             });
             break;
 
+        //Creazione di un form per eliminare uno studente
         case "deleteStudente":
             var nome = document.createElement("input");
             nome.type = "text";
@@ -230,17 +243,48 @@ document.getElementById("option-selector").addEventListener("change", function()
             });
             break;
 
+        //Creazione di una tabella per mandare a video tutti gli studenti con gli eventuali voti.
         case "getStudente":
-            var lista = document.createElement("p");
-            var studentiString = registro.getStudente();
-            
-            if (studentiString && studentiString.trim() !== "") {
-                lista.textContent = studentiString;
-            } else {
-                lista.textContent = "Nessun studente trovato.";
+            function tabellaStudenti() {
+                const arrayStudenti = registro.getStudente();
+                var classeVoto;
+
+                if (arrayStudenti.length === 0) {
+                    return "<p>Nessuno studente trovato.</p>";
+                }
+
+                let tabellaHTML = '<table id="tableStudenti"><thead><tr><th>Nome</th><th>Cognome</th><th>Voti</th></tr></thead><tbody>';
+
+                arrayStudenti.forEach(studente => {
+                    tabellaHTML += '<tr>';
+                    tabellaHTML += `<td>${studente.nome}</td>`;
+                    tabellaHTML += `<td>${studente.cognome}</td>`;
+
+                    if (studente.voti.length > 0) {
+                        const voti = studente.voti.map(voti => {
+
+                            if(voti.voto >= 6){
+                                classeVoto = "voto-verde";
+                            }
+
+                            else{
+                                classeVoto = "voto-rosso";
+                            }
+
+                            return `<li class="${classeVoto}">${voti.voto} (${voti.data})</li>`;
+                        }).join('');
+                        tabellaHTML += `<td><ul>${voti}</ul></td>`;
+                    }
+
+                    else {
+                        tabellaHTML += '<td>Nessun voto</td>';
+                    }
+                    tabellaHTML += '</tr>';
+                });
+                tabellaHTML += '</tbody></table>';
+                return tabellaHTML;
             }
-        
-            document.getElementById('result').appendChild(lista);
+            document.getElementById('result').innerHTML = tabellaStudenti();
             break;
 
         default:
@@ -248,4 +292,4 @@ document.getElementById("option-selector").addEventListener("change", function()
             break;
     }
 });
-
+//Fine funzioni JavaScript per interagire con l'utente
